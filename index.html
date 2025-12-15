@@ -1,0 +1,575 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotCoin Style App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        a { text-decoration: none; }
+        a:active { color: rgba(241,158,54,1); }
+        html { font-family: sans-serif; }
+        .select-none { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
+        body {
+            background: radial-gradient(circle, rgba(253,237,201,1) 0%, rgba(241,158,54,1) 15%, rgba(23,23,23,1) 75%);
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        .haeder { display: flex; align-items: center; padding: 1rem; }
+        .haeder a { margin-right: 1rem; }
+        .squad-container { margin: 1.75rem auto; width: 80%; height: 4.5rem; border-radius: 15px; background-color: rgba(50, 49, 49, 0.3); border: 2px solid rgb(43, 42, 42, 0.05); }
+        .login { display: flex; align-items: center; justify-content: space-between; height: 100%; padding: 0 1rem; }
+        .login-detail { display: flex; align-items: center; }
+        .profile { width: 3rem; height: 3rem; background-color: rgb(16, 16, 16); display: flex; justify-content: center; align-items: center; border-radius: 5px; overflow: hidden; }
+        .profile img, .profile span { width: 100%; height: 100%; object-fit: cover; font-size: 2rem; color: rgba(151, 151, 151, 0.773); }
+        .user-data { display: flex; flex-direction: column; margin-left: 0.75rem; }
+        .user-data .name { color: #ffffff; }
+        .coin-count-container { width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 2.25rem; }
+        .coin-count-container img { margin-right: 1rem; width: 45px; }
+        .coin-count-container h1 { color: #ffffff; font-size: 3.5rem; }
+        .coin-container { position: relative; margin-top: 1.5rem; width: 100%; display: flex; justify-content: center; }
+        .coin-container span.plus-one { position: absolute; z-index: 999; font-size: 2rem; color: #ffffff; opacity: 0; animation: floatUp 1s ease-out; pointer-events: none; }
+        @keyframes floatUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-50px); } }
+        #coin { transition: .1s; transform-style: preserve-3d; }
+        .menu-container { margin: 2.25rem auto; width: 90%; display: flex; justify-content: center; align-items: center; }
+        .power { display: flex; justify-content: center; margin-right: 0.5rem; width: 33%; }
+        .power-count { display: flex; flex-direction: column; }
+        .power-count span { color: #ffffff; font-weight: bold; font-size: 1.5rem; }
+        .gray { color: #d7d7d798!important; font-size: 0.75rem!important; }
+        .menu-bottuns { width: 67%; padding: 1rem 0.25rem; display: flex; justify-content: space-around; align-items: center; height: 5rem; background-color: rgba(218, 218, 218, 0.2); border: 2px solid rgba(218, 218, 218, 0.03); border-radius: 15px; margin-left: 0.5rem; margin-right: -1.25rem; }
+        .menu-button { cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 0.25rem; width: 33.3333%; }
+        .menu-button img { margin-top: 0.5rem; }
+        .menu-button span { margin-top: 0.25rem; font-weight: bold; color: #ffffff; }
+        .b-r { border-right: 2px solid rgba(218, 218, 218, 0.1); }
+        .progress-bar { width: 90%; height: 1rem; margin: 1.25rem auto; border-radius: 30px; background-color: rgba(218, 218, 218, 0.5) }
+        .progress { height: 100%; background: linear-gradient(278deg, rgba(253,237,201,1) 2%, rgba(241,158,54,1) 52%, rgba(185,103,0,1) 88%); border-radius: 30px; }
+
+        body.boost, body.friends, body.earn, body.guid, body.login-page { background: linear-gradient(0deg, rgba(157,101,30,1) 5%, rgba(0,0,0,1) 45%); background-repeat: no-repeat; background-attachment: fixed; color: #ffffff; padding-bottom: 4rem; }
+        .user-balance { display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 3rem; }
+        .balance-title { color: #c1c1c1; margin-bottom: 1.5rem; }
+        .balance-coins { display: flex; justify-content: center; align-items: center; margin-bottom: 2rem; font-size: 3.5rem; font-weight: bold; }
+        .balance-coins img { margin-right: 0.75rem; }
+        .balance-guid { color: rgba(185,103,0,1); font-weight: 700; }
+        .free-boosts, .boosters { padding: 0 1rem; }
+        .free-boosts-title, .boosters-title { margin-bottom: 0.5rem; padding: 0 0.3rem; }
+        .free-boosts-buttons { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .free-boost-button { cursor: pointer; display: flex; width: 50%; height: 4.5rem; margin: 0.5rem 0; justify-content: space-between; align-items: center; border-radius: 15px; padding: 0 0.75rem; background-color: rgba(218, 218, 218, 0.2); border:2px solid rgba(218, 218, 218, 0.02); }
+        .free-boost-button[disabled] { opacity: 0.5; cursor: not-allowed; }
+        .free-boosts-detail { display: flex; flex-direction: column; justify-content: center; }
+        .m-r { margin-right: 0.75rem; }
+        .m-l { margin-left: 0.75rem; }
+        .available { margin-top: 0.25rem; color: #919191; font-size: 0.75rem; }
+        .frens-main { margin: 2rem 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .frens-count { margin-bottom: 1.25rem; font-size: 2rem; font-weight: bold; }
+        .frens-help, .frens-list { padding: 1rem; }
+        .frens-help-title, .frens-list-title { padding-left: 0.5rem; color: rgba(241,158,54,1); font-weight: 600; margin-bottom: 0.75rem; }
+        .frens-list-title { color: #ffffff; }
+        .frens-help-box, .frens-list-box { width: 100%; margin: 0 auto; border-radius: 15px; background-color: rgba(218, 218, 218, 0.2); border: 2px solid rgba(218, 218, 218, 0.02); }
+        .frens-invite { cursor: pointer; display: flex; justify-content: center; align-items: center; width: 100%; padding: 1rem; }
+        .frens-invite-button { width: 90%; }
+        .frens-invite-button span { display: flex; justify-content: center; align-items: center; color: #ffffff; font-size: 1.25rem; background: linear-gradient(83deg, rgba(255,184,95,1) 3%, rgba(241,158,54,1) 28%, rgba(255,142,2,1) 91%); width: 100%; padding: 1rem 0; border-radius: 15px; }
+        .frens-help-content { padding: 1rem; display: flex; align-items: center; }
+        .frens-help-image { margin-right: 0.75rem; }
+        .fren-help-text h5 { font-size: 1rem; font-weight: 500; margin-bottom: 0.25rem; }
+        .fren-help-text div{ margin-top: 0.25rem; display: flex; align-items: center; }
+        .fren-help-text div img { margin-right: 0.25rem; }
+        .fren-help-text div span { margin-right: 0.25rem; }
+        .frens-open-detail { display: flex; justify-content: center; align-items: center; padding: 1rem 0; }
+        .frens-open-detail a { color: #ffffff; font-weight: bold; }
+        #earn-page .task-container { padding: 1rem; }
+        #earn-page .task { margin: 8px 0; padding: 12px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px; background-color: rgba(218, 218, 0.2); transition: transform 0.3s ease; width: 100%; box-sizing: border-box; }
+        #earn-page .task-detail { display: flex; align-items: center; gap: 10px; text-align: left; }
+        #earn-page .task-image img { border-radius: 8px; width: 40px; height: 40px; }
+        #earn-page .task h4 { margin: 0; font-size: 14px; color: #f2f2f2; font-weight: bold; }
+        #earn-page .task-data { display: flex; align-items: center; gap: 5px; margin-top: 4px; }
+        #earn-page .task-data img { width: 18px; height: 18px; }
+        #earn-page .task-data h5 { margin: 0; color: #ffcc00; font-size: 14px; font-weight: bold; }
+        #earn-page .task-actions { display: flex; gap: 8px; }
+        #earn-page .task-button { background-color: #f19e36; color: #000; border: none; padding: 6px 14px; font-size: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: background-color: 0.3s ease; white-space: nowrap; }
+        #earn-page .task-button:disabled { background-color: #555; color: #aaa; cursor: not-allowed; }
+        @media screen and (min-width: 764px) {
+            body { max-width: 450px; margin: 0 auto; background-color: #191919!important; background-size: 450px; background-position: center; }
+            .squad-container { margin: 0.5rem auto; }
+            .slide  { width: 19.5rem!important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="home-page" class="page active">
+        <div class="squad-container">
+            <div class="login">
+                <div class="login-detail">
+                    <div class="profile">
+                        <img src="https://html4herosimages.vercel.app/Robot%20Mine.png" alt="Profile">
+                    </div>
+
+                    <div class="user-data">
+                        <span class="name">UNKNOWN</span>
+                    </div>
+                </div>
+                <a href="#" class="login-button">
+                    <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path opacity="0.8" d="M2.00098 11.999L16.001 11.999M16.001 11.999L12.501 8.99902M16.001 11.999L12.501 14.999" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path opacity="0.5" d="M9.00195 7C9.01406 4.82497 9.11051 3.64706 9.87889 2.87868C10.7576 2 12.1718 2 15.0002 2L16.0002 2C18.8286 2 20.2429 2 21.1215 2.87868C22.0002 3.75736 22.0002 5.17157 22.0002 8L22.0002 16C22.0002 18.8284 22.0002 20.2426 21.1215 21.1213C20.2429 22 18.8286 22 16.0002 22H15.0002C12.1718 22 10.7576 22 9.87889 21.1213C9.11051 20.3529 9.01406 19.175 9.00195 17" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <div class="coin-count-container">
+            <img src="https://html4herosimages.vercel.app/Main%20Coin%20Image.png" width="45px">
+            <h1 class="select-none"></h1>
+        </div>
+        
+        <div class="coin-container">
+            <img src="https://html4herosimages.vercel.app/Main%20Coin%20Image.png" id="coin" class="select-none" width="300px" />
+        </div>
+
+        <div class="menu-container">
+            <div class="power">
+                <img src="https://html4herosimages.vercel.app/Energy%20Icon.png" width="40px">
+                <div class="power-count">
+                    <span id="power" class="select-none">0</span>
+                    <span class="gray select-none" id="total">/0</span>
+                </div>
+            </div>
+
+            <div class="menu-bottuns">
+                <a class="menu-button b-r" data-page="friends-page">
+                    <img src="https://html4herosimages.vercel.app/Friends%20Nav%20Icon.png" alt="" width="28px">
+                    <span class="select-none">Friends</span>
+                </a>
+                <a class="menu-button b-r" data-page="earn-page">
+                    <img src="https://html4herosimages.vercel.app/Task%20Nav%20Icon.png" alt="" width="28px">
+                    <span class="select-none">Earn</span>
+                </a>
+                <a class="menu-button" data-page="boost-page">
+                    <img src="https://html4herosimages.vercel.app/Boost%20Nav%20Icon.png" alt="" width="28px">
+                    <span class="select-none">Boost</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+    </div>
+    
+    <div id="friends-page" class="page friends">
+         <div class="haeder">
+            <a href="#" data-page="home-page" class="back-button">
+                <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 11.9299H2" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8.00009 19L2.84009 14C2.5677 13.7429 2.35071 13.433 2.20239 13.0891C2.05407 12.7452 1.97754 12.3745 1.97754 12C1.97754 11.6255 2.05407 11.2548 2.20239 10.9109C2.35071 10.567 2.5677 10.2571 2.84009 10L8.00009 5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+        <div class="frens-main">
+            <div class="frens-count"> <span>11 Frens</span> </div>
+        </div>
+        <div class="frens-help">
+            <div class="frens-help-title"> <span>Invite frens to get bonuses</span> </div>
+            <div class="frens-help-box">
+                <div class="frens-help-content">
+                    <div class="frens-help-image"> <img src="https://html4herosimages.vercel.app/Main%20Coin%20Image.png" width="50px"> </div>
+                    <div class="fren-help-text">
+                        <h5>Invite fren</h5>
+                        <div> <img src="https://html4herosimages.vercel.app/Main%20Coin%20Image.png" width="15px"> <span>2,500</span> <span>for you and fren</span> </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="frens-invite">
+             <a class="frens-invite-button" id="inviteButton">
+                <span>Invite a fren</span>
+             </a>
+        </div>
+    </div>
+    
+    <div id="earn-page" class="page earn">
+        <div class="haeder">
+             <a href="#" data-page="home-page" class="back-button">
+                <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 11.9299H2" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8.00009 19L2.84009 14C2.5677 13.7429 2.35071 13.433 2.20239 13.0891C2.05407 12.7452 1.97754 12.3745 1.97754 12C1.97754 11.6255 2.05407 11.2548 2.20239 10.9109C2.35071 10.567 2.5677 10.2571 2.84009 10L8.00009 5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+        <div class="task-container" id="tasks-list">
+             <!-- Tasks will be dynamically inserted here -->
+        </div>
+    </div>
+    
+    <div id="boost-page" class="page boost">
+         <div class="haeder">
+            <a href="#" data-page="home-page" class="back-button">
+                <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 11.9299H2" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8.00009 19L2.84009 14C2.5677 13.7429 2.35071 13.433 2.20239 13.0891C2.05407 12.7452 1.97754 12.3745 1.97754 12C1.97754 11.6255 2.05407 11.2548 2.20239 10.9109C2.35071 10.567 2.5677 10.2571 2.84009 10L8.00009 5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+        <div class="user-balance">
+            <div class="balance-title"> <span class="select-none">Your balance</span> </div>
+            <div class="balance-coins"> <img src="https://html4herosimages.vercel.app/Main%20Coin%20Image.png" width="50px" alt=""> <span id="balance-boost" class="select-none"></span> </div>
+        </div>
+        <div class="free-boosts">
+            <div class="free-boosts-title"> <h2>Free daily boosters</h2> </div>
+            <div class="free-boosts-buttons">
+                <div class="free-boost-button m-r" id="turbo-button">
+                    <div class="free-boosts-detail"> <span class="select-none">Turbo</span> <span class="available select-none" id="turbo-count">3/3 available</span> </div>
+                    <div> <img src="https://html4herosimages.vercel.app/Turbo%20Icon.png" width="30px" alt=""> </div>
+                </div>
+                <div class="free-boost-button m-l" id="charge-button">
+                    <div class="free-boosts-detail"> <span class="select-none">Full Energy</span> <span class="available select-none" id="charge-count">3/3 available</span> </div>
+                    <div> <img src="https://html4herosimages.vercel.app/Energy%20Icon.png" width="30px" alt=""> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let fieldValues = {};
+
+            // --- Page Switching Logic ---
+            const pages = document.querySelectorAll('.page');
+            const navButtons = document.querySelectorAll('.menu-button, .back-button');
+
+            function showPage(pageId) {
+                document.body.className = pageId.replace('-page','');
+                pages.forEach(page => {
+                    page.classList.toggle('active', page.id === pageId);
+                });
+            }
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = button.getAttribute('data-page');
+                    if (pageId) {
+                        showPage(pageId);
+                    }
+                });
+            });
+
+            // --- Main Game Logic ---
+            const image = document.getElementById('coin');
+            const coinCountH1 = document.querySelector('.coin-count-container h1');
+            const powerDisplay = document.getElementById('power');
+            const totalPowerDisplay = document.getElementById('total');
+            const progressBar = document.querySelector('.progress');
+            const balanceBoostDisplay = document.getElementById('balance-boost');
+            const loginButton = document.querySelector('.login-button');
+            const userNameDisplay = document.querySelector('.user-data .name');
+            const tasksListContainer = document.getElementById('tasks-list');
+
+            // Boost buttons
+            const turboButton = document.getElementById('turbo-button');
+            const chargeButton = document.getElementById('charge-button');
+            const turboCountDisplay = document.getElementById('turbo-count');
+            const chargeCountDisplay = document.getElementById('charge-count');
+            
+            // Invite button
+            const inviteButton = document.getElementById('inviteButton');
+            
+            let tasksData = [];
+            const numberOfTasks = 6;
+            
+            function buildTasksData(currentFieldValues) {
+                tasksData = [];
+                for (let i = 1; i <= numberOfTasks; i++) {
+                    tasksData.push({ 
+                        id: 'tasks-task' + i,
+                        icon: currentFieldValues['tasks-task' + i + '-icon'],
+                        name: currentFieldValues['tasks-task' + i + '-name'],
+                        reward: 5000,
+                        link: currentFieldValues['tasks-task' + i + '-link']
+                    });
+                }
+            }
+
+            let state = {
+                coins: 0,
+                power: 500,
+                totalPower: 500,
+                tapValue: 1,
+                powerRegenPerSecond: 1,
+                user: null,
+                boosts: {
+                    turbo: 3,
+                    charge: 3,
+                },
+                claimedTasks: new Set(),
+                visitedTasks: new Set(),
+                lastBoostDate: null,
+            };
+
+            function loadState() {
+                const savedState = localStorage.getItem('notcoinStyleStateV2');
+                if (savedState) {
+                    const parsed = JSON.parse(savedState);
+                    state = { ...state, ...parsed };
+                    state.claimedTasks = new Set(parsed.claimedTasks || []);
+                    state.visitedTasks = new Set(parsed.visitedTasks || []);
+                }
+                
+                // Reset daily boosts if it's a new day
+                const today = new Date().toDateString();
+                if (state.lastBoostDate !== today) {
+                    state.boosts.turbo = 3;
+                    state.boosts.charge = 3;
+                    state.lastBoostDate = today;
+                }
+            }
+
+            function saveState() {
+                const stateToSave = {
+                    ...state,
+                    claimedTasks: Array.from(state.claimedTasks),
+                    visitedTasks: Array.from(state.visitedTasks),
+                };
+                localStorage.setItem('notcoinStyleStateV2', JSON.stringify(stateToSave));
+            }
+            
+            function updateUI() {
+                if(coinCountH1) coinCountH1.textContent = state.coins.toLocaleString();
+                if(powerDisplay) powerDisplay.textContent = state.power;
+                if(totalPowerDisplay) totalPowerDisplay.textContent = '/' + state.totalPower;
+                if(progressBar) progressBar.style.width = (state.totalPower > 0) ? ((100 * state.power) / state.totalPower) + '%' : '0%';
+                if(balanceBoostDisplay) balanceBoostDisplay.textContent = state.coins.toLocaleString();
+
+                if (state.user) {
+                    if (userNameDisplay) userNameDisplay.textContent = state.user;
+                    if (loginButton) loginButton.style.display = 'none';
+                } else {
+                     if (userNameDisplay) userNameDisplay.textContent = 'UNKNOWN';
+                     if (loginButton) loginButton.style.display = 'block';
+                }
+
+                if (turboCountDisplay) turboCountDisplay.textContent = state.boosts.turbo + '/3 available';
+                if (chargeCountDisplay) chargeCountDisplay.textContent = state.boosts.charge + '/3 available';
+                if (turboButton) turboButton.disabled = state.boosts.turbo <= 0;
+                if (chargeButton) chargeButton.disabled = state.boosts.charge <= 0;
+
+                updateTasksUI();
+            }
+
+            if(image) {
+                image.addEventListener('click', (e) => {
+                    if (state.power <= 0) return;
+
+                    navigator.vibrate(5);
+                    state.coins += state.tapValue;
+                    state.power -= state.tapValue;
+                    if(state.power < 0) state.power = 0;
+                    
+                    updateUI();
+                    saveState();
+                    
+                    const coinContainer = document.querySelector('.coin-container');
+                    const plusOne = document.createElement('span');
+                    plusOne.textContent = '+' + state.tapValue;
+                    plusOne.className = 'plus-one';
+                    plusOne.style.left = e.offsetX + 'px';
+                    plusOne.style.top = e.offsetY + 'px';
+                    coinContainer.appendChild(plusOne);
+                    setTimeout(() => plusOne.remove(), 1000);
+
+                    // Skew effect
+                    let x = e.offsetX;
+                    let y = e.offsetY;
+                    if(x < 150 && y < 150) image.style.transform = 'translate(-0.25rem, -0.25rem) skewY(-10deg) skewX(5deg)';
+                    else if (x < 150 && y > 150) image.style.transform = 'translate(-0.25rem, 0.25rem) skewY(-10deg) skewX(5deg)';
+                    else if (x > 150 && y > 150) image.style.transform = 'translate(0.25rem, 0.25rem) skewY(10deg) skewX(-5deg)';
+                    else if (x > 150 && y < 150) image.style.transform = 'translate(0.25rem, -0.25rem) skewY(10deg) skewX(-5deg)';
+                    setTimeout(() => image.style.transform = 'translate(0px, 0px)', 100);
+                });
+            }
+
+            // Power regeneration
+            setInterval(() => {
+                if (state.power < state.totalPower) {
+                    state.power += state.powerRegenPerSecond;
+                    if (state.power > state.totalPower) {
+                        state.power = state.totalPower;
+                    }
+                    updateUI();
+                    saveState();
+                }
+            }, 1000);
+
+            // Boost Logic
+            if(turboButton) {
+                turboButton.addEventListener('click', () => {
+                    if(state.boosts.turbo > 0){
+                        state.boosts.turbo--;
+                        state.tapValue = 10;
+                        turboButton.disabled = true; // Visually disable during turbo
+                        setTimeout(() => {
+                            state.tapValue = 1;
+                            updateUI();
+                        }, 10000); // Turbo lasts 10 seconds
+                        updateUI();
+                        saveState();
+                    }
+                });
+            }
+
+            if(chargeButton) {
+                chargeButton.addEventListener('click', () => {
+                    if(state.boosts.charge > 0){
+                        state.boosts.charge--;
+                        state.power = state.totalPower;
+                        updateUI();
+                        saveState();
+                    }
+                });
+            }
+
+            // User Login Simulation
+            if (loginButton) {
+                loginButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (!state.user) {
+                        const randomId = Math.floor(10000 + Math.random() * 90000);
+                        state.user = 'User-' + randomId;
+                        updateUI();
+                        saveState();
+                    }
+                });
+            }
+            
+            // Invite Button Logic
+            if (inviteButton) {
+                inviteButton.addEventListener('click', () => {
+                    const linkToCopy = fieldValues['invite-link'] || 'https://example.com/invite';
+                    navigator.clipboard.writeText(linkToCopy).then(() => {
+                        const originalText = inviteButton.querySelector('span').textContent;
+                        inviteButton.querySelector('span').textContent = 'Copied!';
+                        setTimeout(() => {
+                           inviteButton.querySelector('span').textContent = originalText;
+                        }, 2000);
+                    });
+                });
+            }
+
+            // Tasks Logic
+            function generateTasks() {
+                if (!tasksListContainer) return;
+                tasksListContainer.innerHTML = '';
+                const coinIconSrc = fieldValues['shared-coin-icon'] || 'https://html4herosimages.vercel.app/Main%20Coin%20Image.png';
+                buildTasksData(fieldValues);
+                tasksData.forEach(task => {
+                    if (task.name && task.icon && task.link && task.name.trim() !== '' && task.icon.trim() !== '' && !task.icon.includes("placehold.co")) {
+                        const taskElement = document.createElement('div');
+                        taskElement.classList.add('task');
+                        taskElement.dataset.taskId = task.id;
+                        
+                        taskElement.innerHTML = '<div class="task-detail"><div class="task-image"><img src="' + task.icon + '" alt="Task Icon"></div><div><h4>' + task.name + '</h4><div class="task-data"><img src="' + coinIconSrc + '" width="20px" alt="Coin Icon"><h5 data-reward="' + task.reward.toLocaleString() + '">' + task.reward.toLocaleString() + '</h5></div></div></div><div class="task-actions"><a href="' + task.link + '" target="_blank" class="task-button go-button">Go</a><button class="task-button claim-button">Claim</button></div>';
+
+                        tasksListContainer.appendChild(taskElement);
+                    }
+                });
+                attachTaskButtonListeners();
+                updateTasksUI();
+            }
+
+            function attachTaskButtonListeners() {
+                 const allTasks = document.querySelectorAll('#earn-page .task[data-task-id]');
+                 allTasks.forEach(taskElement => {
+                    const taskId = taskElement.dataset.taskId;
+                    if(!taskId) return;
+                    
+                    const goButton = taskElement.querySelector('.go-button');
+                    const claimButton = taskElement.querySelector('.claim-button');
+
+                    if(goButton){
+                        goButton.addEventListener('click', (e) => {
+                             if (e.target.disabled) return;
+                             state.visitedTasks.add(taskId);
+                             saveState();
+                             updateTasksUI();
+                        });
+                    }
+
+                    if(claimButton){
+                        claimButton.addEventListener('click', (e) => {
+                            if (e.target.disabled) return;
+                            const rewardElement = taskElement.querySelector('[data-reward]');
+                            if (rewardElement) {
+                                const rewardAmount = parseInt(rewardElement.dataset.reward, 10);
+                                if (!isNaN(rewardAmount)) {
+                                    state.coins += rewardAmount;
+                                }
+                            }
+                            state.claimedTasks.add(taskId);
+                            saveState();
+                            updateUI();
+                        });
+                    }
+                 });
+            }
+
+            function updateTasksUI() {
+                const taskElements = document.querySelectorAll('#earn-page .task[data-task-id]');
+                taskElements.forEach(taskElement => {
+                    const taskId = taskElement.dataset.taskId;
+                    if (!taskId) return;
+                    
+                    const isClaimed = state.claimedTasks.has(taskId);
+                    const isVisited = state.visitedTasks.has(taskId);
+
+                    const goButton = taskElement.querySelector('.go-button');
+                    if (goButton) goButton.disabled = isClaimed;
+                    
+                    const claimButton = taskElement.querySelector('.claim-button');
+                    if (claimButton) {
+                        if (isClaimed) {
+                            claimButton.textContent = 'Claimed';
+                            claimButton.disabled = true;
+                        } else {
+                            claimButton.textContent = 'Claim';
+                            claimButton.disabled = !isVisited;
+                        }
+                    }
+                });
+            }
+             
+             window.updatePreview = function(newFieldValues) {
+                fieldValues = newFieldValues;
+                let newContent = window.parent.appState.selectedTemplate.html;
+
+                const allValues = { ...newFieldValues };
+                
+                Object.entries(allValues).forEach(([key, value]) => {
+                    newContent = newContent.split('{{' + key + '}}').join(value || '');
+                });
+
+                document.open();
+                document.write(newContent);
+                document.close();
+            }
+
+            // --- Initialization ---
+            function initialize(initialFieldValues) {
+                fieldValues = initialFieldValues;
+                loadState();
+                buildTasksData(fieldValues);
+                generateTasks();
+                updateUI();
+            }
+            window.initializePreview = initialize;
+        });
+    </script>
+</body>
+</html>
