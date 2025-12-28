@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Airdrop Mini App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f1220;
+      color: white;
+      text-align: center;
+    }
+
+    .balance {
+      margin-top: 20px;
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    .coin {
+      margin: 40px auto;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: gold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .coin:active {
+      transform: scale(0.95);
+    }
+
+    .hint {
+      opacity: 0.7;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>🔥 Airdrop Game</h2>
+
+  <div class="balance">
+    Coins: <span class="balance-amount">0</span>
+  </div>
+
+  <div id="duckCoinWrapper" class="coin">
+    TAP
+  </div>
+
+  <div class="hint">
+    ⛔ 500 taps per hour
+  </div>
+
+  <script>
+    // ===============================
+    // TELEGRAM INIT
+    // ===============================
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const user = tg.initDataUnsafe?.user;
+    if (!user) {
+      alert("❌ Open this app inside Telegram");
+      throw new Error("Not in Telegram");
+    }
+
+    const TELEGRAM_ID = user.id.toString();
+    const USERNAME = user.username || user.first_name || "";
+
+    // ===============================
+    // BACKEND URL (LOCAL)
+    // ===============================
+    const API = "http://127.0.0.1:8000";
+
+    // ===============================
+    // LOGIN USER
+    // ===============================
+    fetch(`${API}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        telegram_id: TELEGRAM_ID,
+        username: USERNAME
+      })
+    });
+
+    // ===============================
+    // TAP HANDLER (REAL COINS)
+    // ===============================
+    const coin = document.getElementById("duckCoinWrapper");
+
+    coin.addEventListener("click", async () => {
+      try {
+        const res = await fetch(`${API}/tap`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            telegram_id: TELEGRAM_ID
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.coins !== undefined) {
+          document.querySelector(".balance-amount").textContent = data.coins;
+        } else {
+          alert("⛔ Hourly tap limit reached");
+        }
+
+      } catch (err) {
+        alert("❌ Backend not reachable");
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>
